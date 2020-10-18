@@ -15,6 +15,9 @@ Scene hand detection for real world images.
 - pip install -r requirements
 
 ### Use Jupyter Notebook
-- Extract using feature extraction file. 
+- Download and past your dataset into data folder.
+-- data\A\*
+-- data\B\*
+- Extract using feature_extraction file. 
 - Feature will be saved into abc folder
 - Run model.ipynb file to train and test model
