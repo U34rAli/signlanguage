@@ -4,4 +4,12 @@ models/cross-hands-tiny.cfg
 models/cross-hands-tiny.weights
 models/cross-hands.cfg
 models/cross-hands.weights
+.vscode/*
+data/*
+abc/*
+result/*
+*.h5
 *.pyc
+demo.py
+*.zip
+.ipynb_checkpoints/*

@@ -5,6 +5,10 @@ import os
 import cv2
 
 from yolo import YOLO
+from pathlib import Path
+
+
+resultfolder = "result"
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-i', '--images', default="images", help='Path to images or image file')
@@ -38,42 +42,45 @@ else:
 conf_sum = 0
 detection_count = 0
 
+files = glob.glob("data/*/**")
 for file in files:
-    print(file)
-    mat = cv2.imread(file)
 
-    width, height, inference_time, results = yolo.inference(mat)
+    path = Path(file)
+    path =str(path)
+    path = os.path.join(resultfolder,  path)
 
-    print("%s in %s seconds: %s classes found!" %
-          (os.path.basename(file), round(inference_time, 2), len(results)))
+    if not os.path.exists(path):
+        
+        mat = cv2.imread(file)
+        mat = cv2.resize(mat, (256,256))
+        width, height, inference_time, results = yolo.inference(mat)
 
-    output = []
+        print("%s in %s seconds: %s classes found!" %
+            (os.path.basename(file), round(inference_time, 2), len(results)))
 
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('image', 848, 640)
+        output = []
 
-    for detection in results:
-        id, name, confidence, x, y, w, h = detection
-        cx = x + (w / 2)
-        cy = y + (h / 2)
+        for detection in results:
+            id, name, confidence, x, y, w, h = detection
+            cx = x + (w / 2)
+            cy = y + (h / 2)
 
-        conf_sum += confidence
-        detection_count += 1
+            conf_sum += confidence
+            detection_count += 1
 
-        # draw a bounding box rectangle and label on the image
-        color = (255, 0, 255)
-        cv2.rectangle(mat, (x, y), (x + w, y + h), color, 1)
-        text = "%s (%s)" % (name, round(confidence, 2))
-        cv2.putText(mat, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.25, color, 1)
+            # draw a bounding box rectangle and label on the image
+            color = (255, 0, 255)
+            segment = mat[y:y+h, x:x+w]
+            
+            if not os.path.exists(os.path.dirname(path)):
+                try:
+                    os.makedirs(os.path.dirname(path))
+                except: # Guard against race condition
+                    print("folder error")
 
-        print("%s with %s confidence" % (name, round(confidence, 2)))
+            try:
+                segment = cv2.resize(segment, (256,256))
+                cv2.imwrite(path, segment)
+            except:
+                pass
 
-        # cv2.imwrite("export.jpg", mat)
-
-    # show the output image
-    cv2.imshow('image', mat)
-    cv2.waitKey(0)
-
-print("AVG Confidence: %s Count: %s" % (round(conf_sum / detection_count, 2), detection_count))
-cv2.destroyAllWindows()

@@ -1,7 +1,18 @@
 import argparse
 import cv2
-
+import tensorflow as tf
 from yolo import YOLO
+import numpy as np
+
+class_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y']
+
+model = tf.keras.models.load_model('modelweights.h5')
+def predict_class(img_array):
+    img_array = tf.expand_dims(img_array, 0) # Create a batch
+    predictions = model.predict(img_array)
+    score = tf.nn.softmax(predictions[0])
+    return "Sign {} with a {:.2f} percent confidence.".format(class_names[np.argmax(score)], 100 * np.max(score))
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-n', '--network', default="normal", help='Network Type: normal / tiny / prn')
@@ -42,7 +53,14 @@ while rval:
         # draw a bounding box rectangle and label on the image
         color = (0, 255, 255)
         cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+
+        segment = frame[y:y+h, x:x+w]
+        gray = cv2.cvtColor(segment,cv2.COLOR_BGR2GRAY)
+        segment = cv2.resize(segment, (256,256))
+        predict_class(segment)
+
         text = "%s (%s)" % (name, round(confidence, 2))
+        text = predict_class(segment)
         cv2.putText(frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, color, 2)
 
