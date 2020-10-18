@@ -18,5 +18,6 @@
   -   data\A\\*
   -   data\B\\*
 - Extract features using __feature_extraction.ipynb__ file. It will take some time.
+  - Or use this [link](https://srv-file8.gofile.io/downloadStore/srv-store3/n0oZit/abc.zip) (might not work always) to download already featured extracted data. And place into current directory like abc/.
 - Feature will be saved into __abc__ folder
 - Run __model.ipynb__ file to train and test model
