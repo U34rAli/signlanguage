@@ -7,10 +7,12 @@ models/cross-hands.weights
 .vscode/*
 data/*
 abc/*
+abcd/*
+handgray/*
 result/*
+skin/*
 *.h5
 *.pyc
 *.zip
 .ipynb_checkpoints/*
 demo.py
-demo_webcam.py
