@@ -8,9 +8,10 @@ from pathlib import Path
 import mediapipe as mp
 import tensorflow as tf
 from tensorflow import keras
+import pandas as pd
 
 dataset_folder = "./data"
-resultfolder = "abc"
+resultfolder = "abcd"
 
 data_dir = pathlib.Path(f'{dataset_folder}/')                 
 file_paths = list(data_dir.glob('*/*.jpg'))
@@ -39,8 +40,6 @@ def mediap(image):
     results = hands.process(cv2.flip(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), 1))
     image_hight, image_width, _ = image.shape
 
-    print(results.multi_handedness)
-
     if not results.multi_hand_landmarks:
         return None
     annotated_image = cv2.flip(image.copy(), 1)
@@ -55,25 +54,24 @@ def mediap(image):
         crop_img = annotated_image[ end_point[1]: start_point[1], start_point[0]: end_point[0]]
         crop_img = cv2.flip(crop_img, 1)
 
-        print(image.shape)
-        print(start_point, end_point)
-
         gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
 
         return cv2.resize(gray, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
 
+lab =  ['label']
+pix = [f'pixel{i}' for i in range(1, 28**2+1)]
+lab = lab + pix
+df = df = pd.DataFrame(columns=lab)
 
-# files
 for file in file_paths:
     path = Path(file)
     head, tail = os.path.split(path)
     path = os.path.join( os.path.split(head)[-1],  tail)
     path = os.path.join(resultfolder,  path)
     
-    print(file)    
+    print(file)
+    
     segment = mediap(cv2.imread(str(file)))
-
-    # if not os.path.exists(path):
             
     if not os.path.exists(os.path.dirname(path)):
         try:
@@ -82,7 +80,12 @@ for file in file_paths:
             print("folder error")
     try:
         cv2.imwrite(path, segment)
+
+        data = np.array(segment)
+        img = data.flatten()
+        a = np.append([  ord(head[-1])-65 ], img)
+        df.loc[len(df)] = a
     except:
-        print("Error")
+        print("Error Saving")
 
-
+df.to_csv('dataabc.csv', index=False)
